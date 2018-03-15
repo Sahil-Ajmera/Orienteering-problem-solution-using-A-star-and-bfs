@@ -47,6 +47,67 @@ def set_values_for_speed(speed_through_diff_paths):
     speed_through_diff_paths[(71, 51, 3)] = 10
     speed_through_diff_paths[(0, 0, 0)] = 9
     speed_through_diff_paths[(205, 0, 101)] = 0
+    
+def getNeighbour(x,y,end_columns,end_rows):
+    list_of_neighbours = []
+    pt_1_x = x - 1
+    pt_1_y = y
+    if pt_1_x > 0 and pt_1_x < end_rows and pt_1_y > 0 and pt_1_y < end_columns :
+        new_list = []
+        new_list.append(pt_1_x)
+        new_list.append(pt_1_y)
+        list_of_neighbours.append(new_list)
+    pt_1_x = x
+    pt_1_y = y - 1
+    if pt_1_x > 0 and pt_1_x < end_rows and pt_1_y > 0 and pt_1_y < end_columns:
+        new_list = []
+        new_list.append(pt_1_x)
+        new_list.append(pt_1_y)
+        list_of_neighbours.append(new_list)
+    pt_1_x = x + 1
+    pt_1_y = y
+    if pt_1_x > 0 and pt_1_x < end_rows and pt_1_y > 0 and pt_1_y < end_columns:
+        new_list = []
+        new_list.append(pt_1_x)
+        new_list.append(pt_1_y)
+        list_of_neighbours.append(new_list)
+    pt_1_x = x
+    pt_1_y = y + 1
+    if pt_1_x > 0 and pt_1_x < end_rows and pt_1_y > 0 and pt_1_y < end_columns:
+        new_list = []
+        new_list.append(pt_1_x)
+        new_list.append(pt_1_y)
+        list_of_neighbours.append(new_list)
+    pt_1_x = x + 1
+    pt_1_y = y + 1
+    if pt_1_x > 0 and pt_1_x < end_rows and pt_1_y > 0 and pt_1_y < end_columns:
+        new_list = []
+        new_list.append(pt_1_x)
+        new_list.append(pt_1_y)
+        list_of_neighbours.append(new_list)
+    pt_1_x = x + 1
+    pt_1_y = y - 1
+    if pt_1_x > 0 and pt_1_x < end_rows and pt_1_y > 0 and pt_1_y < end_columns:
+        new_list = []
+        new_list.append(pt_1_x)
+        new_list.append(pt_1_y)
+        list_of_neighbours.append(new_list)
+    pt_1_x = x - 1
+    pt_1_y = y + 1
+    if pt_1_x > 0 and pt_1_x < end_rows and pt_1_y > 0 and pt_1_y < end_columns:
+        new_list = []
+        new_list.append(pt_1_x)
+        new_list.append(pt_1_y)
+        list_of_neighbours.append(new_list)
+    pt_1_x = x - 1
+    pt_1_y = y - 1
+    if pt_1_x > 0 and pt_1_x < end_rows and pt_1_y > 0 and pt_1_y < end_columns:
+        new_list = []
+        new_list.append(pt_1_x)
+        new_list.append(pt_1_y)
+        list_of_neighbours.append(new_list)
+
+    return list_of_neighbours
 
 
 def read_points_to_visit(points_to_visit):
