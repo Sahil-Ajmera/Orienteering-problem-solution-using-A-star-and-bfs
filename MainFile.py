@@ -1,3 +1,7 @@
+"""
+Author : Sahil Ajmera
+Orienteering problem solution using A* and Bfs
+"""
 from PIL import Image
 from math import *
 from queue import PriorityQueue
@@ -5,11 +9,11 @@ from queue import PriorityQueue
 # Had to take z value as into consideration for calculation of distance
 
 def readImageAndElevationFile(map, elevation_file):
-    """
-
-    :param map:
-    :param elevation_file:
-    :return:
+     """
+    Reading the image file and elevation file along with pixel values(RGB) at various pixels
+    :param map:Input given the program
+    :param elevation_file:Elevation file given for elevation info at various points
+    :return:Modified image , elevation_info list containing elevations , pixels containing RGB values
     """
     # Image convert to RBG
     map_image = Image.open(map)
@@ -29,27 +33,55 @@ def readImageAndElevationFile(map, elevation_file):
     return map_image, elevation_info, pixels
 
 def set_values_for_speed(speed_through_diff_paths):
-    """
-    
-    :param time_to_go_through_diff_paths: 
-    :return: 
+   """
+    Setting predefined values for speed through different terrains based on rbg value of terrain
+    :param speed_through_diff_paths: Dictionary to keep speed mapped to terrain
+    :return: dictionary after filling in values
     """""
 
     # Speed when going through different types of path
-
+    # Open Land
     speed_through_diff_paths[(248, 148, 18)] = 8
+    
+    # Rough Meadow
     speed_through_diff_paths[(255, 192, 0)] = 3
+    
+    # Easy movement forest
     speed_through_diff_paths[(255, 255, 255)] = 7
+    
+    # Slow run forest
     speed_through_diff_paths[(2, 208, 60)] = 5
+    
+    # Walk forest
     speed_through_diff_paths[(2, 136, 40)] = 2
+    
+    # Impassible vegetation
     speed_through_diff_paths[(5, 73, 24)] = 1
+    
+    # Lake / Swamp / Marsh
     speed_through_diff_paths[(0, 0, 255)] = 4
+    
+    # Paved road
     speed_through_diff_paths[(71, 51, 3)] = 10
+    
+    # Foot path
     speed_through_diff_paths[(0, 0, 0)] = 9
+    
+    # Out of Bounds
     speed_through_diff_paths[(205, 0, 101)] = 0
     
 def getNeighbour(x,y,end_columns,end_rows):
+    """
+    List of neighbors of a particular x and y
+    :param x:Input x
+    :param y: Input y
+    :param end_columns:Max value that can be attained by a y
+    :param end_rows: Max value that can be attained by a x
+    :return: list of neighbors of a particular x and y
+    """
     list_of_neighbours = []
+    
+    # point above  (x,y)
     pt_1_x = x - 1
     pt_1_y = y
     if pt_1_x > 0 and pt_1_x < end_rows and pt_1_y > 0 and pt_1_y < end_columns :
@@ -57,6 +89,8 @@ def getNeighbour(x,y,end_columns,end_rows):
         new_list.append(pt_1_x)
         new_list.append(pt_1_y)
         list_of_neighbours.append(new_list)
+        
+    # point to the left of (x,y)
     pt_1_x = x
     pt_1_y = y - 1
     if pt_1_x > 0 and pt_1_x < end_rows and pt_1_y > 0 and pt_1_y < end_columns:
@@ -64,6 +98,8 @@ def getNeighbour(x,y,end_columns,end_rows):
         new_list.append(pt_1_x)
         new_list.append(pt_1_y)
         list_of_neighbours.append(new_list)
+        
+    # point below (x,y)
     pt_1_x = x + 1
     pt_1_y = y
     if pt_1_x > 0 and pt_1_x < end_rows and pt_1_y > 0 and pt_1_y < end_columns:
@@ -71,6 +107,8 @@ def getNeighbour(x,y,end_columns,end_rows):
         new_list.append(pt_1_x)
         new_list.append(pt_1_y)
         list_of_neighbours.append(new_list)
+        
+    # point right of (x,y)
     pt_1_x = x
     pt_1_y = y + 1
     if pt_1_x > 0 and pt_1_x < end_rows and pt_1_y > 0 and pt_1_y < end_columns:
@@ -78,6 +116,8 @@ def getNeighbour(x,y,end_columns,end_rows):
         new_list.append(pt_1_x)
         new_list.append(pt_1_y)
         list_of_neighbours.append(new_list)
+        
+    # point to the bottom right of (x,y)
     pt_1_x = x + 1
     pt_1_y = y + 1
     if pt_1_x > 0 and pt_1_x < end_rows and pt_1_y > 0 and pt_1_y < end_columns:
@@ -85,6 +125,8 @@ def getNeighbour(x,y,end_columns,end_rows):
         new_list.append(pt_1_x)
         new_list.append(pt_1_y)
         list_of_neighbours.append(new_list)
+        
+    # point to the bottom left of (x,y)
     pt_1_x = x + 1
     pt_1_y = y - 1
     if pt_1_x > 0 and pt_1_x < end_rows and pt_1_y > 0 and pt_1_y < end_columns:
@@ -92,6 +134,8 @@ def getNeighbour(x,y,end_columns,end_rows):
         new_list.append(pt_1_x)
         new_list.append(pt_1_y)
         list_of_neighbours.append(new_list)
+        
+    # point to the top right of (x,y)
     pt_1_x = x - 1
     pt_1_y = y + 1
     if pt_1_x > 0 and pt_1_x < end_rows and pt_1_y > 0 and pt_1_y < end_columns:
@@ -99,6 +143,8 @@ def getNeighbour(x,y,end_columns,end_rows):
         new_list.append(pt_1_x)
         new_list.append(pt_1_y)
         list_of_neighbours.append(new_list)
+        
+    # point to the top left of (x,y)
     pt_1_x = x - 1
     pt_1_y = y - 1
     if pt_1_x > 0 and pt_1_x < end_rows and pt_1_y > 0 and pt_1_y < end_columns:
@@ -111,6 +157,11 @@ def getNeighbour(x,y,end_columns,end_rows):
 
 
 def read_points_to_visit(points_to_visit):
+    """
+    Reading the course file to note the control points and final destination to be visited
+    :param points_to_visit:file containing the control points and final destination to be visited
+    :return:List of points in a list
+    """
     file = open(points_to_visit)
     number_of_lines_in_file = 0
     points_info = []
