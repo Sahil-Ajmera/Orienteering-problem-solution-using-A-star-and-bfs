@@ -49,7 +49,22 @@ def set_values_for_speed(speed_through_diff_paths):
     speed_through_diff_paths[(205, 0, 101)] = 0
 
 
+def read_points_to_visit(points_to_visit):
+    file = open(points_to_visit)
+    number_of_lines_in_file = 0
+    points_info = []
+    for lines in file:
+        number_of_lines_in_file = number_of_lines_in_file + 1
+        points_info.append(lines.split())
+    return points_info
+
 
 # Map = input('Enter the map file')
 # elevation_file = input('Enter the name of the elevation file\t')
 map_image, elevation_info, pixels = readImageAndElevationFile('terrain.png', 'mpp.txt')
+speed_through_different_paths = {}
+set_values_for_speed(speed_through_different_paths)
+# season = input('What season is going on right now ? options - summer , fall , winter , spring\t')
+# mod_image_map = modifyImage(season, map_image)
+points_to_visit = input('Enter the file containing points to visit')
+points_to_visit_info = read_points_to_visit(points_to_visit)
