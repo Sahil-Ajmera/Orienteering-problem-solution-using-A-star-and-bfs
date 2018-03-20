@@ -286,7 +286,240 @@ class Orienteering:
         else:
             dist = sqrt(((7.55)) ** 2 + ((10.29)) ** 2)
         return dist
+    
+    def detect_water_edges(self,image):
+        # PIL accesses images in Cartesian co-ordinates, so it is Image[columns, rows]
+        # print(self.pixels)
+        water_list = []
+        neighbours = [(1, 1), (-1, 1), (0, 1), (1, 0), (-1, -1), (1, -1), (-1, 0), (0, -1)]
+        water_edges = []
+        for i in range(self.map_end_rows):
+            for j in range(self.map_end_columns):
+                water_test = 0
+                number_of_missed_pixels = 0
+                for k in range(len(neighbours)):
+                    pt_x_1 = i + neighbours[k][0]
+                    pt_y_1 = j + neighbours[k][1]
+                    if pt_x_1 >= 0 and pt_x_1 < self.map_end_rows and pt_y_1 >= 0 and pt_y_1 <  self.map_end_columns:
+                        if self.pixels[pt_x_1, pt_y_1] == (0, 0, 255):
+                            water_test = water_test + 1
+                    else:
+                        number_of_missed_pixels = number_of_missed_pixels + 1
+                if ((water_test == 8) or (8-number_of_missed_pixels == water_test)):
+                    water_list.append((i, j))
+                elif water_test > 1:
+                    water_edges.append((i, j))
+        #self.draw_points_on_image(self.map, water_edges)
+        return water_edges, water_list
+    
+    def draw_points_on_image(self,map,list):
+        im = Image.open(self.map)
+        #im.show()
+        draw = ImageDraw.Draw(im)
+        for index in range(len(list)-1):
+            draw.point(list[index], fill=(255, 0, 0))
+        # draw.line(list, fill=(255, 0, 0), width=1)
+        # draw.line((200, 200, 150, 300), fill=255, width=20)
+        im.save('terrain-winter',"PNG")
+        im.show()
 
+    def water_bfs(self,water_edges_list):
+        neighbours = [(1, 1), (-1, 1), (0, 1), (1, 0), (-1, -1), (1, -1), (-1, 0), (0, -1)]
+        q = []
+        chances = 0
+        safe_water_list =[]
+        points_visited = []
+        tracker = 0
+        dict_to_keep_track = {}
+        tracker = 0
+        #sorted(dict_to_keep_track.items(), key=lambda x: x[1])
+
+        for index_point in water_edges_list:
+            x_value = index_point[0]
+            y_value = index_point[1]
+            initial_x_value = x_value
+            initial_y_value = y_value
+            q.append(((x_value, y_value), 0))
+            dict_to_keep_track[(x_value, y_value)] = tracker
+            tracker = tracker + 1
+            start_tuple = ((-1, -1), 0)
+            while not ((start_tuple[0][0] == initial_x_value + 6) or
+                           (start_tuple[0][1] == (initial_y_value + 6)) or
+                           (start_tuple[0][0] == initial_x_value - 6) or
+                           (start_tuple[0][1] == (initial_y_value - 6)) or len(q) == 0):
+                start_tuple = q.pop(0)
+                del dict_to_keep_track[start_tuple[0]]
+                # start_tuple = q.pop(0)
+                if start_tuple[0] in points_visited:
+                    continue
+                else:
+                    points_visited.append(start_tuple[0])
+                    # dict_to_keep_track[(x_value, y_value)] = tracker
+                    # dict_to_keep_track[(x_value, y_value)] = tracker
+                    tracker = tracker + 1
+                    # q.append((x_value, y_value))
+                for k in range(len(neighbours)):
+                    x_value = start_tuple[0][0] + neighbours[k][0]
+                    y_value = start_tuple[0][1] + neighbours[k][1]
+                    if x_value >= 0 and x_value < self.map_end_rows and y_value >= 0 and y_value < self.map_end_columns:
+                        if (x_value,y_value) not in dict_to_keep_track:
+                        #if (x_value, y_value) not in q:
+                            #q.append((x_value, y_value))
+                            dict_to_keep_track[(x_value, y_value)] = tracker
+                            tracker = tracker + 1
+                            if self.pixels[x_value, y_value] == (0, 0, 255):
+                                safe_water_list.append((x_value, y_value))
+                q = sorted(dict_to_keep_track.items(), key=lambda x: x[1])
+            while not (len(q) == 0):
+                start_tuple = q.pop(0)
+                del dict_to_keep_track[start_tuple[0]]
+                if self.pixels[start_tuple[0][0], start_tuple[0][1]] == (0, 0, 255):
+                    safe_water_list.append((start_tuple[0][0], start_tuple[0][1]))
+        self.draw_points_on_image(self.map, safe_water_list)
+
+ def draw_winter(self):
+        water_edges_list,water_list=self.detect_water_edges('terrain.png')
+        self.water_bfs(water_edges_list)
+        dist = 0
+        final_path = []
+        for i in range(len(self.points_info)-1):
+            start = self.points_info[i]
+            end = self.points_info[i+1]
+            startTouple = (int(start[0]),int(start[1]))
+            endTouple = (int(end[0]),int(end[1]))
+            final_path = final_path + self.search_for_path(startTouple,endTouple)
+        for index in range(len(final_path) - 1):
+              dist = dist + self.path_length(int(final_path[index][0]), int(final_path[index][1]), int(final_path[index + 1][0]),int(final_path[index + 1][1]))
+        print(dist)
+        im = self.draw_line_on_image('terrain-winter', final_path)
+        #im.show()
+        
+    def search_for_path_winter(self, start,final):
+
+        #neighbour_list = self.getNeighbour(startx, starty)
+        g_value = self.calculateg(start[0], start[1], start[0], start[1],start[0], start[1])
+        h_value = self.calculateh(start[0], start[1], final[0], final[1])
+
+        cost_so_far = {}
+        s = PQ()
+        predecessor = {}
+
+        # start_point = (startx, starty)
+        s.put(start, 0)
+        #predecessor[start_point] = None
+        cost_so_far[start] = 0
+
+        # final_path_list = []
+        while not s.empty():
+            point_to_be_explored = s.get()
+            final_path_list = []
+            # if tuple(point_to_be_explored[0]) not in predecessor :
+            #
+            # else:
+            #     continue
+
+            if point_to_be_explored == final:
+                curr = final
+                while curr != start:
+                    final_path_list.insert(0,curr)
+                    curr = predecessor[curr]
+                final_path_list.insert(0,start)
+                break
+
+            neighbour_list = self.getNeighbour_winter(int(point_to_be_explored[0]),int(point_to_be_explored[1]))
+            for points in neighbour_list:
+                # print('points',points)
+                g_value = cost_so_far[point_to_be_explored] + self.calculateg(points[0], points[1],
+                                                                                 point_to_be_explored[0],
+                                                                                 point_to_be_explored[1],
+                                                                                 start[0], start[1])
+                #
+                if points not in cost_so_far or g_value < cost_so_far[points]:
+                    h_value = self.calculateh(points[0], points[1], final[0], final[1])
+                    cost_so_far[points] = g_value
+                    s.put(points, g_value + h_value)
+                    predecessor[points] = point_to_be_explored
+        return final_path_list
+    
+    
+    def getNeighbour_winter(self, x, y):
+        """
+        List of neighbors of a particular x and y
+        :param x:Input x
+        :param y: Input y
+        :param end_columns:Max value that can be attained by a y
+        :param end_rows: Max value that can be attained by a x
+        :return: list of neighbors of a particular x and y
+        """
+        list_of_neighbours = []
+        end_columns = self.map_end_columns
+        end_rows = self.map_end_rows
+        # point below (x,y)
+        pt_1_x = x + 1
+        pt_1_y = y
+        # Extra conditions
+        if pt_1_x >= 0 and pt_1_x < end_rows and pt_1_y >= 0 and pt_1_y < end_columns and self.pixels[
+            pt_1_x, pt_1_y] != (205, 0, 101) and pt_1_x < end_columns and pt_1_y < end_rows and self.pixels[
+            pt_1_x, pt_1_y] != (0, 0, 255):
+            list_of_neighbours.append((pt_1_x, pt_1_y))
+
+        # point right of (x,y)
+        pt_1_x = x
+        pt_1_y = y + 1
+        if pt_1_x >= 0 and pt_1_x < end_rows and pt_1_y >= 0 and pt_1_y < end_columns and self.pixels[
+            pt_1_x, pt_1_y] != (205, 0, 101) and pt_1_x < end_columns and pt_1_y < end_rows and self.pixels[
+            pt_1_x, pt_1_y] != (0, 0, 255):
+            list_of_neighbours.append((pt_1_x, pt_1_y))
+
+        # point above  (x,y)
+        pt_1_x = x - 1
+        pt_1_y = y
+        if pt_1_x >= 0 and pt_1_x < end_rows and pt_1_y >= 0 and pt_1_y < end_columns and self.pixels[
+            pt_1_x, pt_1_y] != (205, 0, 101) and pt_1_x < end_columns and pt_1_y < end_rows and self.pixels[
+            pt_1_x, pt_1_y] != (0, 0, 255):
+            list_of_neighbours.append((pt_1_x, pt_1_y))
+
+        # point to the left of (x,y)
+        pt_1_x = x
+        pt_1_y = y - 1
+        if pt_1_x >= 0 and pt_1_x < end_rows and pt_1_y >= 0 and pt_1_y < end_columns and self.pixels[
+            pt_1_x, pt_1_y] != (205, 0, 101) and pt_1_x < end_columns and pt_1_y < end_rows and self.pixels[
+            pt_1_x, pt_1_y] != (0, 0, 255):
+            list_of_neighbours.append((pt_1_x, pt_1_y))
+
+        # point to the bottom left of (x,y)
+        pt_1_x = x + 1
+        pt_1_y = y - 1
+        if pt_1_x >= 0 and pt_1_x < end_rows and pt_1_y >= 0 and pt_1_y < end_columns and self.pixels[
+            pt_1_x, pt_1_y] != (205, 0, 101) and pt_1_x < end_columns and pt_1_y < end_rows and self.pixels[
+            pt_1_x, pt_1_y] != (0, 0, 255):
+            list_of_neighbours.append((pt_1_x, pt_1_y))
+
+        # point to the top right of (x,y)
+        pt_1_x = x - 1
+        pt_1_y = y + 1
+        if pt_1_x >= 0 and pt_1_x < end_rows and pt_1_y >= 0 and pt_1_y < end_columns and self.pixels[
+            pt_1_x, pt_1_y] != (205, 0, 101) and pt_1_x < end_columns and pt_1_y < end_rows and self.pixels[
+            pt_1_x, pt_1_y] != (0, 0, 255):
+            list_of_neighbours.append((pt_1_x, pt_1_y))
+
+        # point to the top left of (x,y)
+        pt_1_x = x - 1
+        pt_1_y = y - 1
+        if pt_1_x >= 0 and pt_1_x < end_rows and pt_1_y >= 0 and pt_1_y < end_columns and self.pixels[
+            pt_1_x, pt_1_y] != (205, 0, 101) and pt_1_x < end_columns and pt_1_y < end_rows and self.pixels[
+            pt_1_x, pt_1_y] != (0, 0, 255):
+            list_of_neighbours.append((pt_1_x, pt_1_y))
+
+        # point to the bottom right of (x,y)
+        pt_1_x = x + 1
+        pt_1_y = y + 1
+        if pt_1_x >= 0 and pt_1_x < end_rows and pt_1_y >= 0 and pt_1_y < end_columns and self.pixels[
+            pt_1_x, pt_1_y] != (205, 0, 101) and pt_1_x < end_columns and pt_1_y < end_rows and self.pixels[
+            pt_1_x, pt_1_y] != (0, 0, 255):
+            list_of_neighbours.append((pt_1_x, pt_1_y))
+
+        return list_of_neighbours
 
 
 def main():
