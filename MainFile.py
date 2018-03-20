@@ -222,6 +222,54 @@ class Orienteering:
         dx = abs(int(startx) - int(finalx))
         dy = abs(int(starty) - int(finaly))
         return (1*(dx + dy) + (-1) * min(dx, dy))
+    
+    def search_for_path(self, start,final):
+
+        #neighbour_list = self.getNeighbour(startx, starty)
+        g_value = self.calculateg(start[0], start[1], start[0], start[1],start[0], start[1])
+        h_value = self.calculateh(start[0], start[1], final[0], final[1])
+
+        cost_so_far = {}
+        s = PQ()
+        predecessor = {}
+
+        # start_point = (startx, starty)
+        s.put(start, 0)
+        #predecessor[start_point] = None
+        cost_so_far[start] = 0
+
+        # final_path_list = []
+        while not s.empty():
+            point_to_be_explored = s.get()
+            final_path_list = []
+            # if tuple(point_to_be_explored[0]) not in predecessor :
+            #
+            # else:
+            #     continue
+
+            if point_to_be_explored == final:
+                curr = final
+                while curr != start:
+                    final_path_list.insert(0,curr)
+                    curr = predecessor[curr]
+                final_path_list.insert(0,start)
+                break
+
+            neighbour_list = self.getNeighbour(int(point_to_be_explored[0]),int(point_to_be_explored[1]))
+            for points in neighbour_list:
+                # print('points',points)
+                g_value = cost_so_far[point_to_be_explored] + self.calculateg(points[0], points[1],
+                                                                                 point_to_be_explored[0],
+                                                                                 point_to_be_explored[1],
+                                                                                 start[0], start[1])
+                #
+                if points not in cost_so_far or g_value < cost_so_far[points]:
+                    h_value = self.calculateh(points[0], points[1], final[0], final[1])
+                    cost_so_far[points] = g_value
+                    s.put(points, g_value + h_value)
+                    predecessor[points] = point_to_be_explored
+        return final_path_list
+
 
 
 def main():
