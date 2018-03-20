@@ -269,6 +269,23 @@ class Orienteering:
                     s.put(points, g_value + h_value)
                     predecessor[points] = point_to_be_explored
         return final_path_list
+    
+    def draw_line_on_image(self,map_image,final_path):
+        im = Image.open(map_image)
+        draw = ImageDraw.Draw(im)
+        draw.line(final_path, fill=(255, 0, 0), width = 1)
+        # draw.line((200, 200, 150, 300), fill=255, width=20)
+        im.show()
+        return im
+
+    def path_length(self,nextx,nexty,prevx,prevy):
+        if (nextx == (prevx + 1) or nextx == (prevx - 1)) and nexty == prevy:
+            dist = 7.55
+        elif nextx == prevx and (nexty == (prevy + 1) or nexty == (prevy - 1)):
+            dist = 10.29
+        else:
+            dist = sqrt(((7.55)) ** 2 + ((10.29)) ** 2)
+        return dist
 
 
 
