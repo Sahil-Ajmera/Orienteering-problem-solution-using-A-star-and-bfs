@@ -166,6 +166,21 @@ class Orienteering:
         for lines in file:
             self.points_info.append(lines.split())
         return self.points_info
+    
+    def draw_summer(self):
+        dist = 0
+        final_path = []
+        for i in range(len(self.points_info)-1):
+            start = self.points_info[i]
+            end = self.points_info[i+1]
+            startTouple = (int(start[0]),int(start[1]))
+            endTouple = (int(end[0]),int(end[1]))
+            final_path = final_path + self.search_for_path_winter(startTouple,endTouple)
+        for index in range(len(final_path) - 1):
+              dist = dist + self.path_length(int(final_path[index][0]), int(final_path[index][1]), int(final_path[index + 1][0]),int(final_path[index + 1][1]))
+        print(dist)
+        im = self.draw_line_on_image(self.map, final_path)
+        im.show()
 
 
 def main():
