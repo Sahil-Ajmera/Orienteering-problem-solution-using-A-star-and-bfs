@@ -181,6 +181,47 @@ class Orienteering:
         print(dist)
         im = self.draw_line_on_image(self.map, final_path)
         im.show()
+     
+    def calculateg(self,nextx, nexty, prevx, prevy, startx, starty):
+        pixel_info = self.pixels
+        elevation_info = self.elevation_info
+        speed_info = self.speed_through_different_paths
+        if nextx == startx and nexty == starty:
+            return 0
+        else:
+            if (nextx == (prevx + 1) or nextx == (prevx - 1)) and nexty == prevy:
+                dist = 7.55
+            elif nextx == prevx and (nexty == (prevy + 1) or nexty == (prevy - 1)):
+                dist = 10.29
+            else:
+                dist = sqrt(((7.55))**2 + ((10.29))**2)
+        dist = sqrt(dist**2 + (float(elevation_info[nextx][nexty])-float(elevation_info[prevx][prevy]))**2)
+        speed = speed_info[pixel_info[nextx,nexty]]
+        if float(elevation_info[nextx][nexty]) == float(elevation_info[prevx][prevy]):
+            speed = speed
+        elif float(elevation_info[nextx][nexty]) - float(elevation_info[prevx][prevy]) <= 0.3:
+            speed = speed - 0.05 * speed
+        elif float(elevation_info[nextx][nexty]) - float(elevation_info[prevx][prevy]) < 0.6:
+            speed = speed - 0.10 * speed
+        elif float(elevation_info[nextx][nexty]) - float(elevation_info[prevx][prevy]) < 0.8:
+            speed = speed - 0.15 * speed
+        elif float(elevation_info[nextx][nexty]) - float(elevation_info[prevx][prevy]) < 1.0:
+            speed = speed - 0.20 * speed
+        elif float(elevation_info[nextx][nexty]) - float(elevation_info[prevx][prevy]) <= -0.3:
+            speed = speed + 0.05 * speed
+        elif float(elevation_info[nextx][nexty]) - float(elevation_info[prevx][prevy]) <= -0.6:
+            speed = speed + 0.10 * speed
+        elif float(elevation_info[nextx][nexty]) - float(elevation_info[prevx][prevy]) <= -0.8:
+            speed = speed + 0.15 * speed
+        elif float(elevation_info[nextx][nexty]) - float(elevation_info[prevx][prevy]) <= -1.0:
+            speed = speed + 0.20 * speed
+        time = dist / speed
+        return time
+    
+    def calculateh(self,startx, starty, finalx, finaly):
+        dx = abs(int(startx) - int(finalx))
+        dy = abs(int(starty) - int(finaly))
+        return (1*(dx + dy) + (-1) * min(dx, dy))
 
 
 def main():
