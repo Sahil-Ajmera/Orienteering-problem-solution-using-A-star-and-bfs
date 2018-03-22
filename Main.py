@@ -281,6 +281,15 @@ def main():
             endTouple = (int(end[0]), int(end[1]))
             final_path = final_path + object_orien.search_for_path(summer_obj, startTouple, endTouple)
         object_orien.draw_line_on_image(object_orien.map, final_path, (255, 0, 0))
+    
+    if season == "winter":
+
+        winter_obj = winter.Winter()
+        water_edges_list, water_list = winter_obj.detect_water_edges(object_orien.pixels,
+                                                                     object_orien.elevation_end_rows,
+                                                                     object_orien.elevation_end_columns)
+        winter_obj.water_bfs(water_edges_list)
+
 
 
 if __name__ == "__main__":
