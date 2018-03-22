@@ -321,6 +321,21 @@ def main():
             endTouple = (int(end[0]), int(end[1]))
             final_path = final_path + fall_obj.search_for_path_fall(object_orien, startTouple, endTouple)
         object_orien.draw_line_on_image('terrain-winter', final_path, (255, 0, 0))
+    if season == "spring" or season == "Spring":
+        spring_obj = spring.Spring()
+        water_edges_list, water_list = spring_obj.detect_water_edges(object_orien.pixels,
+                                                                     object_orien.map_end_rows,
+                                                                     object_orien.map_end_columns)
+        spring_obj.bfs_spring(object_orien,
+                              water_edges_list)
+
+        for i in range(len(object_orien.points_info) - 1):
+            start = object_orien.points_info[i]
+            end = object_orien.points_info[i + 1]
+            startTouple = (int(start[0]), int(start[1]))
+            endTouple = (int(end[0]), int(end[1]))
+            final_path = final_path + spring_obj.search_for_path_spring(object_orien, startTouple, endTouple)
+        object_orien.draw_line_on_image('terrain-spring', final_path, (255, 0, 0))
 
 if __name__ == "__main__":
     main()
