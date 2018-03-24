@@ -13,7 +13,7 @@ class Fall:
     __slots__ = 'path_color'
 
     def __init__(self):
-        self.path_color = (255,206,145)
+        self.path_color = (0, 255, 0)
 
     def detect_easy_movement(self, pixels, max_rows, max_columns):
         """
@@ -25,7 +25,7 @@ class Fall:
         # List to store easy movement areas
         easy_movement_list = []
 
-        #CHECK
+
         # Typical neighbours for a point
         neighbours = [(0, 1), (1, 0), (-1, 0), (0, -1)]
 
@@ -125,14 +125,14 @@ class Fall:
 
     def search_for_path_fall(self, object_orien, start, final):
         """
-        Search for path during the winter season
+        Search for path during the fall season
         :param start:Start point
         :param final:Point to be reached
         :return:Final list containing the final path
         """
 
-        #CHECK
-        object_orien.speed_through_different_paths[(255,206,145)] = 1
+
+        object_orien.speed_through_different_paths[self.path_color] = 4
 
         # To keep track of g values
         cost_so_far = {}
@@ -244,4 +244,28 @@ class Fall:
         for index in range(len(list)-1):
             # Paint points with sky blue color
             draw.point(list[index], fill=self.path_color)
-        im.save('terrain-winter', "PNG")
+        im.save('terrain-fall', "PNG")
+
+    def calulate_dist(self, object_orien, final_path):
+        """
+        Calculates distance of final_path_found
+        :param final_path:final path obtained by traversal
+        :return:None
+        """
+        dist = 0
+        for index in range(len(final_path) - 1):
+            dist = dist + self.path_length(object_orien, final_path[index], final_path[index + 1])
+        print("Distance:"+str(dist))
+
+    def path_length(self, object_orien, start_point, end_point):
+        """
+        Returns the path_length
+        :param object_orien:orienteering class object
+        :param start_point:point x1,y1,z1
+        :param end_point:point x2,y2,z2
+        :return:distance between x1,y1,z1 and x2,y2,z2
+        """
+        return sqrt((start_point[0]-end_point[0])**2 +
+                    (start_point[0]-end_point[1])**2 +
+                    (float(object_orien.elevation_info[start_point[0]][start_point[1]]) - float(
+                        object_orien.elevation_info[end_point[0]][end_point[1]])) ** 2)
