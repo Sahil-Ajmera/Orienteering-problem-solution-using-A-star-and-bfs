@@ -1,10 +1,10 @@
+"""
+Author : Sahil Ajmera
+Winter class
+"""
 from PIL import Image,ImageDraw
-import summer,winter
-from math import *
-from queue import Queue
-
 from PriorityQueue import PQ
-import operator
+from math import *
 
 class Winter:
     __slots__ = 'path_color'
@@ -36,7 +36,7 @@ class Winter:
                 for k in range(len(neighbours)):
                         pt_x_1 = points[0] + neighbours[k][0]
                         pt_y_1 = points[1] + neighbours[k][1]
-                        # If neighbour is not water then point is a edge
+                        # If point in consideration is water and neighbour is not water then neighbour is a edge
                         if pt_x_1 >= 0 and\
                                         pt_x_1 < max_rows and\
                                         pt_y_1 >= 0 and\
@@ -143,7 +143,7 @@ class Winter:
         :param final:Point to be reached
         :return:Final list containing the final path
         """
-        object_orien.speed_through_different_paths[(178, 255, 255)] = 4
+        object_orien.speed_through_different_paths[(178, 255, 255)] = 5
         object_orien.speed_through_different_paths[(0, 0, 255)] = 0.1
 
         # To keep track of g values
@@ -201,7 +201,6 @@ class Winter:
                 calculated_h_value = object_orien.calculateh(neighbour[0], neighbour[1], final[0], final[1])
 
                 # If neighbour not already in queue or neighbour calculated f value less than than its tracked f value till now
-                # CHECK 7
                 if neighbour not in cost_so_far or \
                                 calculated_g_value + calculated_h_value < f_value[neighbour]:
 
@@ -225,7 +224,7 @@ class Winter:
         end_columns = obj.map_end_columns
         end_rows = obj.map_end_rows
 
-        neighbours = [(1, 0), (0, 1), (1, 1), (-1, 1), (1, -1), (-1, -1), (0, -1), (-1, 0)]
+        neighbours = [(1, 0), (0, 1), (0, -1), (-1, 0)]
 
         for values in neighbours:
             pt_1_x = x + values[0]
@@ -243,5 +242,29 @@ class Winter:
                 list_of_neighbours.append((pt_1_x, pt_1_y))
 
         return list_of_neighbours
+
+    def calulate_dist(self, object_orien, final_path):
+        """
+        Calculates distance of final_path_found
+        :param final_path:final path obtained by traversal
+        :return:None
+        """
+        dist = 0
+        for index in range(len(final_path) - 1):
+            dist = dist + self.path_length(object_orien, final_path[index], final_path[index + 1])
+        print("Distance:"+str(dist))
+
+    def path_length(self, object_orien, start_point, end_point):
+        """
+        Returns the path_length
+        :param object_orien:orienteering class object
+        :param start_point:point x1,y1,z1
+        :param end_point:point x2,y2,z2
+        :return:distance between x1,y1,z1 and x2,y2,z2
+        """
+        return sqrt((start_point[0]-end_point[0])**2 +
+                    (start_point[0]-end_point[1])**2 +
+                    (float(object_orien.elevation_info[start_point[0]][start_point[1]]) - float(
+                        object_orien.elevation_info[end_point[0]][end_point[1]])) ** 2)
 
 
