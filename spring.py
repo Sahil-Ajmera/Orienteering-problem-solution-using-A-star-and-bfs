@@ -124,7 +124,7 @@ class Spring:
                                         y_value < object_orien.map_end_columns and\
                                         (x_value,y_value) not in queue and \
                                         (x_value,y_value) not in explored_set and \
-                                (not (float(object_orien.elevation_info[x_value][y_value]) - parent_elevation > 1)) :
+                                (not (float(object_orien.elevation_info[x_value][y_value]) - parent_elevation > 1)) and object_orien.pixels[x_value,y_value] !=(205,0,101) :
                             queue.append((x_value,y_value))
                             # If the neighbour satisfies above conditions check if its non-water
                             if object_orien.pixels[x_value, y_value] != (0, 0, 255):
@@ -152,7 +152,7 @@ class Spring:
         :param final:End point for calculation
         :return:Final path from start to end based on A* search performed
         """
-        # CHECK
+
         object_orien.speed_through_different_paths[self.path_color] = 4
         # To keep track of g values
         cost_so_far = {}
@@ -208,7 +208,7 @@ class Spring:
                 calculated_h_value = object_orien.calculateh(neighbour[0], neighbour[1], final[0], final[1])
 
                 # If neighbour not already in queue or neighbour calculated f value less than than its tracked f value till now
-                # CHECK 7
+
                 if neighbour not in cost_so_far or \
                                         calculated_g_value + calculated_h_value < f_value[neighbour]:
                     cost_so_far[neighbour] = calculated_g_value
@@ -246,3 +246,27 @@ class Spring:
                             pt_1_y < end_rows:
                 list_of_neighbours.append((pt_1_x, pt_1_y))
         return list_of_neighbours
+
+    def calulate_dist(self, object_orien, final_path):
+        """
+        Calculates distance of final_path_found
+        :param final_path:final path obtained by traversal
+        :return:None
+        """
+        dist = 0
+        for index in range(len(final_path) - 1):
+            dist = dist + self.path_length(object_orien, final_path[index], final_path[index + 1])
+        print("Distance:"+str(dist))
+
+    def path_length(self, object_orien, start_point, end_point):
+        """
+        Returns the path_length
+        :param object_orien:orienteering class object
+        :param start_point:point x1,y1,z1
+        :param end_point:point x2,y2,z2
+        :return:distance between x1,y1,z1 and x2,y2,z2
+        """
+        return sqrt((start_point[0]-end_point[0])**2 +
+                    (start_point[0]-end_point[1])**2 +
+                    (float(object_orien.elevation_info[start_point[0]][start_point[1]]) - float(
+                        object_orien.elevation_info[end_point[0]][end_point[1]])) ** 2)
